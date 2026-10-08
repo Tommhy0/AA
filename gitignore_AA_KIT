@@ -1,0 +1,18 @@
+# ---- OS / 编辑器 ----
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+
+# ---- AA 运行/构建残留 ----
+generated_manifest.json
+*.aap.lock
+*.aas.lock
+
+# ---- 本地备份 / 临时 ----
+*.旧版.*
+*.bak
+*.tmp
