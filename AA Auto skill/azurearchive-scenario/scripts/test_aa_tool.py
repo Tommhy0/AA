@@ -72,6 +72,39 @@ class AuthoringChecks(unittest.TestCase):
         self.project['nodes'].append(duplicate)
         self.assertTrue(any('Duplicate node ID' in e['message'] for e in aa.validate(self.project)[0]))
 
+    def test_title_validation_and_compile_guard(self):
+        entry = next(n for n in self.project['nodes'] if n['Kind'] == 'entry')
+        self.project['PreviewTitle'] = '   '
+        entry['Title'] = ''
+        self.assertFalse(aa.validate(self.project)[0])
+        errors = aa.validate(self.project, require_title=True)[0]
+        self.assertEqual(len(errors), 2)
+        args = aa.argparse.Namespace(project=aa.SKILL/'examples/Schale_Demo.aap2', require_auto=True, require_title=True)
+        with patch.object(aa, 'read_project', return_value=self.project), patch.object(aa, 'select_exe') as launch:
+            self.assertEqual(aa.compile_project(args)['stage'], 'static_validation')
+            launch.assert_not_called()
+        self.project['PreviewTitle'] = 'Preview title'
+        entry['Title'] = 'Intentional opening title'
+        self.assertFalse(aa.validate(self.project, require_title=True)[0])
+        entry['Title'] = 42
+        self.assertTrue(aa.validate(self.project)[0])
+
+    def test_generator_titles_and_fallback(self):
+        with tempfile.TemporaryDirectory(dir=Path.cwd()) as directory:
+            root = Path(directory)
+            for index, title in enumerate([None, '', '  ', 'Custom title', 42]):
+                source = root/'input.json'; target = root/f'{index}.aap2'
+                source.write_text(json.dumps(dict(name='Story name', title=title, lines=[dict(text='Hello')])), encoding='utf-8')
+                if title == 42:
+                    with self.assertRaises(ValueError): aa.generate(source, target)
+                    self.assertFalse(target.exists())
+                    continue
+                aa.generate(source, target)
+                project = aa.read_project(target)
+                expected = title if title and title.strip() else 'Story name'
+                self.assertEqual(project['PreviewTitle'], expected)
+                self.assertEqual(project['nodes'][0]['Title'], expected)
+
     def test_occupied_speaker_and_malformed_types(self):
         line = next(n for n in self.project['nodes'] if n['Kind'] == 'dialogue')['Scripts'][1]
         line['speakerSlotNum'] = 4
@@ -97,6 +130,8 @@ class AuthoringChecks(unittest.TestCase):
             aa.generate(source, target); original = target.read_bytes()
             project = aa.read_project(target)
             self.assertFalse(aa.validate(project)[0])
+            self.assertEqual(project['PreviewTitle'], 'Example')
+            self.assertEqual(project['nodes'][0]['Title'], 'Example')
             lines = project['nodes'][1]['Scripts']
             self.assertEqual([(x['bgName'], x['bgmId']) for x in lines], [(1046815759, 37)] * 2)
             with self.assertRaises(ValueError): aa.generate(source, target)

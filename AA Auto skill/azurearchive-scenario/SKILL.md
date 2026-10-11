@@ -2,7 +2,7 @@
 name: azurearchive-scenario
 description: 创作、修改和自动编译 AzureArchive 的 .aap2 剧情工程，按剧情证据查学生性格、减少 OOC，查询演出资源，安装或排查 AzureArchive 资源包。适用于 AzureArchive、.aap2/.aas 和其剧情工程；普通网页 BA 风格改造不使用本技能。
 metadata:
-  version: "3.1"
+  version: "3.2"
 ---
 
 # AzureArchive 剧情创作
@@ -11,14 +11,15 @@ metadata:
 
 ## 工作流程
 
-1. 读现有工程或确定新工程名称。读 [工程格式](references/project-format.md)；创作/修改人物时按 [角色写作流程](references/character-writing.md) 读取本次出场学生的证据档案，确认关系与剧情阶段。查找需要的具体资源，避免把所有清单一次读入。
+1. 读现有工程或确定新工程名称与剧情标题。保留已有有效标题；用户未指定且标题缺失时，依据剧情拟定自然、贴切的标题。读 [工程格式](references/project-format.md)；创作/修改人物时按 [角色写作流程](references/character-writing.md) 读取本次出场学生的证据档案，确认关系与剧情阶段。查找需要的具体资源，避免把所有清单一次读入。
 2. 用 `scripts/aa_tool.py discover` 确认程序与实际数据根。需要安装或排障时才读 [环境说明](references/environment.md) 或 [自定义资源包](references/overrides.md)。
 3. 编辑已有 AAP2；新工程可用 `generate` 从精简剧情 JSON 生成六栏位与 ID。每个对话选项节点指定一个 Auto 选项：将 `DefaultOptionId` 设为该节点选定的 `OptionId`，保留用户已指定路线；未指定时选符合剧情及后续衔接的路线，确保录制可继续。覆盖前备份原文件，保留已有 ProjectId、Guid、LineId、OptionId。不要通配删除同名旧工程或成品。
-4. 复核人物的措辞、动机、关系与当时认知；按下述气泡规则复核演出情境、节奏和清空，再运行 `validate --require-auto` 静态校验和 `compile --require-auto` 自动编译，检查所有选项节点均有有效 Auto。成功须确认本次 `.aas` 非空、build 清单引用本次源文件且 SHA-256 匹配，并检查缺失资源。具体命令、首次配置、发布与回退见 [自动编译](references/automation.md)。
+4. 复核人物的措辞、动机、关系与当时认知；按下述气泡规则复核演出情境、节奏和清空，再运行 `validate --require-auto --require-title` 静态校验和 `compile --require-auto --require-title` 自动编译，检查预览与入口标题均非空、所有选项节点均有有效 Auto。成功须确认本次 `.aas` 非空、build 清单引用本次源文件且 SHA-256 匹配，并检查缺失资源。具体命令、首次配置、发布与回退见 [自动编译](references/automation.md)。
 5. 默认发布到确认过的数据根 saves，交付可浏览的 `.aas` 路径；若环境不支持编译，明确报告具体失败和保留的源文件，不能把未编译说成完成。请求涉及播放时可调用 `--play`；编译成功与实际播放验收分别报告。
 
 ## 关键格式约束
 
+- 必须填写预览标题 `PreviewTitle` 与入口节点 `Title`，默认使用同一剧情标题；用户有意区分时可不同。工程名、文件名不能代替这两个字段；副标题 `PreviewHeader` / `Header` 按需填写。
 - UTF-8 无 BOM；文件前五字节必须是 `41 41 50 32 0A`。
 - 每句 characters 恰好六项；对话发言栏和高亮栏必须有人；旁白按现有格式指向空栏。节点与行 ID 唯一，分支目标存在，编译图不能有环。
 - 每个 `choice` 节点的 `DefaultOptionId` 指向其中恰好一个有效选项，这是编辑器的 Auto 标记；不把 `auto` 写入选项文字。保留其他选项与分支，详见 [选项与自动录制](references/project-format.md#选项与自动录制)。
@@ -54,6 +55,6 @@ metadata:
 
 ## 交付
 
-报告实际源文件、可播放 `.aas`、build 清单、备份路径与关键改动。分别给出静态校验、程序编译/资源检查、发布与播放验收状态。只在完成对应步骤后标记通过；用户能直接浏览已发布成品，无需再进入编辑模式触发编译。
+报告剧情标题、实际源文件、可播放 `.aas`、build 清单、备份路径与关键改动。分别给出静态校验、程序编译/资源检查、发布与播放验收状态。只在完成对应步骤后标记通过；用户能直接浏览已发布成品，无需再进入编辑模式触发编译。
 
 版本变更记录见 [CHANGELOG.md](CHANGELOG.md)。

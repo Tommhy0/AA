@@ -1,6 +1,6 @@
-# azurearchive-scenario 3.1
+# azurearchive-scenario 3.2
 
-AzureArchive 剧情创作、人物证据查询、自动编译与录制准备技能。仓库原 1.6 技能已由完整 3.1 版本替换；`_skill` 和 `_skill2` 的旧文件路径保留为新版兼容副本。
+AzureArchive 剧情创作、人物证据查询、自动编译与录制准备技能。仓库原 1.6 技能已由完整 3.2 版本替换；`_skill` 和 `_skill2` 的旧文件路径保留为新版兼容副本。
 
 ## 安装
 
@@ -10,10 +10,10 @@ AzureArchive 剧情创作、人物证据查询、自动编译与录制准备技�
 
 必须连同 scripts、references、assets、examples 一起安装，不能仅复制 SKILL.md。
 
-## 3.1 的主要功能
+## 3.2 的主要功能
 
 - 每个对话选项节点设置一个 Auto，保留既定录制路线，避免自动播放在选项处等待。
-- `validate/compile --require-auto` 检查每个选项的 DefaultOptionId，遗漏时定位到具体节点；不把 auto 拼到选项文字中。
+- `validate/compile --require-auto --require-title` 检查每个选项的 DefaultOptionId，遗漏时定位到具体节点；不把 auto 拼到选项文字中。
 - 自动编译为可浏览的 `.aas`，检查成品、源文件哈希和缺失资源。
 - 72 名学生的初版证据档案默认按出场人物读取，复杂关系和剧情阶段按需查询原文。
 - 气泡按人物、情境与演出节奏使用，鼓励点睛，避免滥用。
@@ -22,10 +22,12 @@ AzureArchive 剧情创作、人物证据查询、自动编译与录制准备技�
 
 ```powershell
 # 在完整技能目录中执行
-python -B -X utf8 scripts/aa_tool.py validate "examples/Schale_Demo.aap2" --require-auto
-python -B -X utf8 scripts/aa_tool.py compile "剧情.aap2" --require-auto --exe "程序目录/AzureArchive.exe" --data-root "实际数据目录/data"
+python -B -X utf8 scripts/aa_tool.py validate "examples/Schale_Demo.aap2" --require-auto --require-title
+python -B -X utf8 scripts/aa_tool.py compile "剧情.aap2" --require-auto --require-title --exe "程序目录/AzureArchive.exe" --data-root "实际数据目录/data"
 ```
 
 原生编译需要已有 AzureArchive 与支持的 BepInEx/Authoring API，详见编译说明。编译通过不代表已经实际播放或录制完成。原文缓存位于技能之外，未随仓库打包；基础性格卡可以离线读取。
 
 文本与脚本许可见 [LICENSE](LICENSE)。本仓库为第三方工具与资料，不包含 AA 本体或游戏素材。
+
+3.2 新增剧情标题要求：填写预览 `PreviewTitle` 和入口 `Title`，保留已有标题，缺失时按剧情拟题。交付前使用 `--require-title` 检查，防止空标题进入编译。

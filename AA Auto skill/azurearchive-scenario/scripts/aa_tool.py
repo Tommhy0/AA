@@ -40,10 +40,16 @@ def read_project(path):
                       parse_constant=lambda x: (_ for _ in ()).throw(ValueError('Invalid JSON number: ' + x)))
 
 
-def validate(project, require_auto=False):
+def validate(project, require_auto=False, require_title=False):
     errors, warnings = [], []
     def err(path, message):
         errors.append({'path': path, 'message': message})
+    def check_title(value, path):
+        if not isinstance(value, str):
+            err(path, 'Expected title string.')
+        elif not value.strip():
+            (errors if require_title else warnings).append({
+                'path': path, 'message': 'Missing scenario title; fill PreviewTitle and entry.Title before delivery.'})
     def guid(value, path):
         try:
             if not isinstance(value, str) or str(uuid.UUID(value)) != value.lower():
@@ -57,7 +63,8 @@ def validate(project, require_auto=False):
     guid(project.get('ProjectId'), '$.ProjectId')
     if type(project.get('FormatVersion')) is not int or project.get('FormatVersion') != 2:
         err('$.FormatVersion', 'Expected format version 2.')
-    for field in ['PreviewHeader', 'PreviewTitle']:
+    check_title(project.get('PreviewTitle'), '$.PreviewTitle')
+    for field in ['PreviewHeader']:
         if not isinstance(project.get(field), str): err('$.' + field, 'Expected string.')
     if not integer(project.get('PreviewBgName'), 0, 0xffffffff):
         err('$.PreviewBgName', 'Expected uint32.')
@@ -163,7 +170,9 @@ def validate(project, require_auto=False):
                 err(path + '.ConnectionsTo', 'Expected target array.'); targets = []
             for k, target in enumerate(targets): guid(target, f'{path}.ConnectionsTo[{k}]')
         if isinstance(nid, str): edges[nid] = [t.lower() for t in targets if isinstance(t, str)]
-        if kind == 'entry': entries.append(nid)
+        if kind == 'entry':
+            entries.append(nid)
+            check_title(node.get('Title'), path + '.Title')
         if kind == 'dialogue':
             scripts = node.get('Scripts')
             if not isinstance(scripts, list): err(path + '.Scripts', 'Expected script array.')
@@ -234,7 +243,10 @@ def new_line(line, bg, bgm):
 def generate(source, target):
     if target.exists(): raise ValueError('generate creates new projects only. Edit existing AAP2 while preserving its IDs.')
     data = json.loads(source.read_text(encoding='utf-8-sig'))
-    title = data.get('title', data['name']); lines = []
+    title = data.get('title')
+    if title is None or (isinstance(title, str) and not title.strip()):
+        title = data['name']
+    lines = []
     bg, bgm = data.get('bg', 'BG_Black'), data.get('bgm', 999)
     for line in data['lines']:
         bg, bgm = line.get('bg', bg), line.get('bgm', bgm)
@@ -249,7 +261,7 @@ def generate(source, target):
                        dict(Scripts=lines, NodeName=None, Guid=dialogue, ConnectionsTo=[exit_id], X=300, Y=0, Kind='dialogue'),
                        dict(IsEnding=True, EndText=data.get('ending', ''), NeHeader='', NeTitle='', NeScriptDirty=ending,
                             Guid=exit_id, ConnectionsTo=[], X=600, Y=0, Kind='exit')])
-    errors, warnings = validate(project)
+    errors, warnings = validate(project, require_title=True)
     if errors: raise ValueError(json.dumps(errors, ensure_ascii=False))
     target.parent.mkdir(parents=True, exist_ok=True)
     with target.open('xb') as stream:
@@ -417,7 +429,7 @@ def publish(source, build, data_root, name):
 
 def compile_project(args):
     source = args.project.resolve(); project = read_project(source)
-    errors, warnings = validate(project, require_auto=args.require_auto)
+    errors, warnings = validate(project, require_auto=args.require_auto, require_title=getattr(args, 'require_title', False))
     if errors: return dict(ok=False, stage='static_validation', errors=errors, warnings=warnings)
     exe = select_exe(args.exe)
     data_root = select_data_root(args.data_root) if not args.no_publish else None
@@ -445,18 +457,20 @@ def main():
     sub.add_parser('discover')
     p = sub.add_parser('validate'); p.add_argument('project', type=Path)
     p.add_argument('--require-auto', action='store_true', help='Require one Auto option in every choice for recording.')
+    p.add_argument('--require-title', action='store_true', help='Require preview and entry scenario titles.')
     p = sub.add_parser('generate'); p.add_argument('input', type=Path); p.add_argument('project', type=Path)
     p = sub.add_parser('compile'); p.add_argument('project', type=Path)
     p.add_argument('--exe'); p.add_argument('--data-root'); p.add_argument('--name')
     p.add_argument('--no-publish', action='store_true'); p.add_argument('--play', action='store_true')
     p.add_argument('--work-dir', type=Path); p.add_argument('--timeout', type=int, default=90)
     p.add_argument('--require-auto', action='store_true', help='Reject choices without an Auto option before compilation.')
+    p.add_argument('--require-title', action='store_true', help='Reject missing scenario titles before compilation.')
     args = parser.parse_args()
     try:
         if args.command == 'discover': result = discover()
         elif args.command == 'generate': result = generate(args.input.resolve(), args.project.resolve())
         elif args.command == 'validate':
-            errors, warnings = validate(read_project(args.project), require_auto=args.require_auto); result = dict(ok=not errors, errors=errors, warnings=warnings)
+            errors, warnings = validate(read_project(args.project), require_auto=args.require_auto, require_title=args.require_title); result = dict(ok=not errors, errors=errors, warnings=warnings)
         else:
             if not 15 <= args.timeout <= 3600: raise ValueError('Timeout must be 15..3600 seconds.')
             result = compile_project(args)

@@ -10,13 +10,14 @@
 
 ```powershell
 python -B -X utf8 scripts/aa_tool.py discover
-python -B -X utf8 scripts/aa_tool.py validate "examples/Schale_Demo.aap2" --require-auto
-python -B -X utf8 scripts/aa_tool.py compile "工程.aap2" --require-auto --exe "程序目录/AzureArchive.exe" --data-root "实际数据目录/data"
+python -B -X utf8 scripts/aa_tool.py validate "examples/Schale_Demo.aap2" --require-auto --require-title
+python -B -X utf8 scripts/aa_tool.py compile "工程.aap2" --require-auto --require-title --exe "程序目录/AzureArchive.exe" --data-root "实际数据目录/data"
 ```
 
 `compile` 默认发布成品到指定数据根的 `saves/<源文件名>.aas` 与 `.build.json`，资源目录为 `saves/<源文件名>/`。程序已有成品会先移到 `data/.aa-kit-backups/<唯一时间目录>/`，发布失败回滚；不通配删除 `.aap`、`.aas.lock` 或其他文件。运行中的播放器可能占用成品，此时发布明确失败，保留原成品和新 build，关闭对应播放后再重试。
 
 - `--no-publish`：只在工程旁的 `.aa-kit-builds/<唯一任务>/build/` 编译，不改当前 saves。
+- `--require-title`：交付标题检查，要求 `PreviewTitle` 和入口 `Title` 非空；缺失时在原生编译前报错，普通校验仅警告空标题。
 - `--require-auto`：录制准备检查，要求每个选项节点设置有效的 `DefaultOptionId`，缺失时在启动编译器前报错；普通校验仍会警告未设 Auto 的旧工程。选项写法见 [选项与自动录制](project-format.md#选项与自动录制)。
 - `--work-dir "目录"`：指定构建/诊断目录；每次使用独立子目录，旧构建不作为本次结果。
 - `--name "成品名"`：设置发布文件名，不改变工程内容或 ProjectId。
@@ -57,10 +58,10 @@ python -B -X utf8 scripts/aa_tool.py compile "工程.aap2" --require-auto --exe 
 
 ```powershell
 python -B -X utf8 scripts/aa_tool.py generate "剧情输入.json" "新工程.aap2"
-python -B -X utf8 scripts/aa_tool.py compile "新工程.aap2" --require-auto --exe "程序目录/AzureArchive.exe" --data-root "实际数据目录/data"
+python -B -X utf8 scripts/aa_tool.py compile "新工程.aap2" --require-auto --require-title --exe "程序目录/AzureArchive.exe" --data-root "实际数据目录/data"
 ```
 
-生成器显式填充背景/BGM、六栏位、节点/行 ID 与默认枚举。背景/BGM 可在某句覆盖并沿用到下一句；stage 必须逐句给出完整在场角色。未写 speaker 为旁白；speaker 为 1..5 时对应 stage 必须有人。自定义角色 name 使用 manifest Identifier。
+生成器将 `title` 同时写入预览与入口标题；`title` 缺省、null 或纯空白时使用非空 `name`，非字符串标题报错。助手应先拟定贴切的标题，不依赖技术性文件名充当标题。生成器显式填充背景/BGM、六栏位、节点/行 ID 与默认枚举。背景/BGM 可在某句覆盖并沿用到下一句；stage 必须逐句给出完整在场角色。未写 speaker 为旁白；speaker 为 1..5 时对应 stage 必须有人。自定义角色 name 使用 manifest Identifier。
 
 `generate` 只创建新文件，目标存在时拒绝覆盖，避免重建已有 ID。分支或已有工程直接编辑完整 AAP2，保留已有标识，并用 validate/compile 验收；生成器不擅自压平分支。
 
@@ -76,4 +77,4 @@ python -B -X utf8 scripts/aa_tool.py compile "新工程.aap2" --require-auto --e
 
 ## 交付状态
 
-分别报告：静态校验（含所有选项的 Auto 设置）、原生编译、缺失资源/哈希检查、saves 发布、播放请求，以及人工播放验收。录制交付报告所选自动路线；未实际录制不称为录制成功，`playback_reviewed:false` 不能改写为已看完剧情。
+分别报告：静态校验（含预览/入口标题与所有选项的 Auto 设置）、原生编译、缺失资源/哈希检查、saves 发布、播放请求，以及人工播放验收。录制交付报告所选自动路线；未实际录制不称为录制成功，`playback_reviewed:false` 不能改写为已看完剧情。
