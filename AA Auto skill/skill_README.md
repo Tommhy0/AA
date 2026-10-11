@@ -1,34 +1,31 @@
-# azurearchive-scenario
+# azurearchive-scenario 3.1
 
-《蔚蓝档案》剧情创作技能（AzureArchive / `.aap2`）—— 让 AI 直接**手写 `.aap2` 工程 JSON** 来创作剧情，
-比驱动 AA 那套 Unity 节点编辑器可靠得多。**版本 v1.6。**
-
-> 本技能是 [AA_KIT](../../README.md) 的一部分 —— 那份资料包里还有**四语 README**、六张参考资料、示例工程与排障脚本。
+AzureArchive 剧情创作、人物证据查询、自动编译与录制准备技能。仓库原 1.6 技能已由完整 3.1 版本替换；`_skill` 和 `_skill2` 的旧文件路径保留为新版兼容副本。
 
 ## 安装
 
-- **Claude 桌面版**：用 App 的“技能 → 添加”，选择上两级目录里的 `azurearchive-scenario.skill`。
-- **Claude Code**：把本目录整个拷到你的 skills 目录，例如
-  `~/.claude/skills/azurearchive-scenario/`（Windows：`C:\Users\<你>\.claude\skills\azurearchive-scenario\`）。
+- Codex：将完整 [azurearchive-scenario](azurearchive-scenario/) 目录复制到 `~/.agents/skills/azurearchive-scenario/`。
+- Claude Code：将同一完整目录复制到 `~/.claude/skills/azurearchive-scenario/`。
+- 支持 `.skill` 导入的客户端：下载 [azurearchive-scenario.skill](azurearchive-scenario.skill)。
 
-## 目录内容
+必须连同 scripts、references、assets、examples 一起安装，不能仅复制 SKILL.md。
 
-| 文件 | 说明 |
-|---|---|
-| **`SKILL.md`** | 技能正文 —— 数据目录、`.aap2` 结构、全部字段、对照表、坑。**核心。** |
-| `CHANGELOG.md` | 更新日志（`0.1 → 1.6`）。 |
-| `references/` | 六张参考资料清单 + `xxhash32.py`（算资源名哈希）。 |
-| `examples/Schale_Demo.aap2` | 示例工程（3 角色 / 4 背景 / 弹窗 / 音效 / 气泡 / 动作 / 分支 / 旁白）。 |
+## 3.1 的主要功能
 
-## 快速用法
+- 每个对话选项节点设置一个 Auto，保留既定录制路线，避免自动播放在选项处等待。
+- `validate/compile --require-auto` 检查每个选项的 DefaultOptionId，遗漏时定位到具体节点；不把 auto 拼到选项文字中。
+- 自动编译为可浏览的 `.aas`，检查成品、源文件哈希和缺失资源。
+- 72 名学生的初版证据档案默认按出场人物读取，复杂关系和剧情阶段按需查询原文。
+- 气泡按人物、情境与演出节奏使用，鼓励点睛，避免滥用。
 
-1. 对 AI 说：“**用 `azurearchive-scenario` 技能写一段 AA 剧情……**”（可指定学校、角色、基调、长度）。
-2. AI 把 `.aap2` 写进 AA 的 `…\data\projects\`。
-3. 你在 AA 里进 **项目模式 → 选中 → 编辑**（打开即自动保存 + 编译），再切 **鉴赏模式** 播放验收。
+使用说明：[SKILL.md](azurearchive-scenario/SKILL.md)、[自动编译](azurearchive-scenario/references/automation.md)、[Auto 选项](azurearchive-scenario/references/project-format.md#选项与自动录制)、[学生索引](azurearchive-scenario/references/characters/INDEX.md)、[更新日志](azurearchive-scenario/CHANGELOG.md)。
 
-> 编译成功 ≠ 已看过效果 —— **务必亲自播一遍**。
+```powershell
+# 在完整技能目录中执行
+python -B -X utf8 scripts/aa_tool.py validate "examples/Schale_Demo.aap2" --require-auto
+python -B -X utf8 scripts/aa_tool.py compile "剧情.aap2" --require-auto --exe "程序目录/AzureArchive.exe" --data-root "实际数据目录/data"
+```
 
-## 许可
+原生编译需要已有 AzureArchive 与支持的 BepInEx/Authoring API，详见编译说明。编译通过不代表已经实际播放或录制完成。原文缓存位于技能之外，未随仓库打包；基础性格卡可以离线读取。
 
-文本与脚本采用 **CC BY-NC-SA 4.0**（署名 · 非商业性使用 · 相同方式共享），© 2026 **Tommhy0** —— 详见 [LICENSE](../../LICENSE)。
-AA 本体与全部游戏素材版权归各自作者，本技能不含任何游戏素材。
+文本与脚本许可见 [LICENSE](LICENSE)。本仓库为第三方工具与资料，不包含 AA 本体或游戏素材。

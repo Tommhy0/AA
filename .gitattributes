@@ -1,0 +1,3 @@
+# Preserve the verified skill bytes, including the mandatory AAP2+LF marker.
+"AA Auto skill/azurearchive-scenario/**" -text
+"AA Auto skill/azurearchive-scenario.skill" binary
