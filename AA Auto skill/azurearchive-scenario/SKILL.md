@@ -1,8 +1,8 @@
 ---
 name: azurearchive-scenario
-description: 创作、修改和自动编译 AzureArchive 的 .aap2 剧情工程，按剧情证据查学生性格、减少 OOC，查询演出资源，安装或排查 AzureArchive 资源包。适用于 AzureArchive、.aap2/.aas 和其剧情工程；普通网页 BA 风格改造不使用本技能。
+description: 创作、修改和自动编译 AzureArchive 的 .aap2 剧情工程，按剧情证据减少 OOC，使用本地 IndexTTS 为剧情生成中日 AI 配音并接入语音资源包，查询或排查演出资源。适用于 AzureArchive、.aap2/.aas 及剧情配音；普通网页 BA 风格改造不使用本技能。
 metadata:
-  version: "3.2"
+  version: "4.0"
 ---
 
 # AzureArchive 剧情创作
@@ -14,7 +14,11 @@ metadata:
 1. 读现有工程或确定新工程名称与剧情标题。保留已有有效标题；用户未指定且标题缺失时，依据剧情拟定自然、贴切的标题。读 [工程格式](references/project-format.md)；创作/修改人物时按 [角色写作流程](references/character-writing.md) 读取本次出场学生的证据档案，确认关系与剧情阶段。查找需要的具体资源，避免把所有清单一次读入。
 2. 用 `scripts/aa_tool.py discover` 确认程序与实际数据根。需要安装或排障时才读 [环境说明](references/environment.md) 或 [自定义资源包](references/overrides.md)。
 3. 编辑已有 AAP2；新工程可用 `generate` 从精简剧情 JSON 生成六栏位与 ID。每个对话选项节点指定一个 Auto 选项：将 `DefaultOptionId` 设为该节点选定的 `OptionId`，保留用户已指定路线；未指定时选符合剧情及后续衔接的路线，确保录制可继续。覆盖前备份原文件，保留已有 ProjectId、Guid、LineId、OptionId。不要通配删除同名旧工程或成品。
+   需要配音时，在文稿与人物复核后按 [AI 配音](references/ai-dubbing.md) 执行 `dub_tool.py prepare → render → apply`：用实际角色资源名映射参考音，按 LineId 绑定音频，在新工程副本中写入 `voice` 与工程专属 `VoiceOverrides`。首次新角色/状态先少量试音；纯文字修改不启动 GPU，已有配音保留。环境缺失时明确报告，保留无配音工程，不擅自重装或下载整库。
+
 4. 复核人物的措辞、动机、关系与当时认知；按下述气泡规则复核演出情境、节奏和清空，再运行 `validate --require-auto --require-title` 静态校验和 `compile --require-auto --require-title` 自动编译，检查预览与入口标题均非空、所有选项节点均有有效 Auto。成功须确认本次 `.aas` 非空、build 清单引用本次源文件且 SHA-256 匹配，并检查缺失资源。具体命令、首次配置、发布与回退见 [自动编译](references/automation.md)。
+   带配音交付额外使用 `compile --require-voices`，核对缺失与被省略的语音均为空、本次 WAV 实际进入编译资源。
+
 5. 默认发布到确认过的数据根 saves，交付可浏览的 `.aas` 路径；若环境不支持编译，明确报告具体失败和保留的源文件，不能把未编译说成完成。请求涉及播放时可调用 `--play`；编译成功与实际播放验收分别报告。
 
 ## 关键格式约束
@@ -28,6 +32,8 @@ metadata:
 - 默认固定栏位；旧版跨句移动失败属于版本经验，特殊移动必须通过当前运行时校验。逻辑栏位和显示位置分开解释。
 
 ## 演出与资源查询
+
+AI 配音默认采用已验收的 IndexTTS-2.5 单条角色参考音，中日均走同一路线；情绪由参考音承载，不默认传一热情感向量。每句生成三候选取最短有效音频，筛查拖音、重复与静音尾巴；最短候选仍可能漏读，音色和语气以人耳为准。不同情绪档、参考音选择、调用命令、分支覆盖、采样率与原声库位置见 [AI 配音](references/ai-dubbing.md)。
 
 人物写作默认使用 [学生档案索引](references/characters/INDEX.md) 中的现成证据卡，仅加载出场学生。首批 72 名有初版档案，其他索引项只有资料定位；不把索引数量当作性格分析覆盖。复杂关系、重要转折、缺卡或证据矛盾时才用 `scripts/character_tool.py search` 按需查原文，详见 [角色写作流程](references/character-writing.md)。性格归纳是创作依据，允许有情境铺垫的反差与成长；不把二创标签、未知关系或后期信息补成原作事实。
 
@@ -43,6 +49,7 @@ metadata:
 |---|---|
 | 基础角色资源键 | [角色名清单](references/角色名清单.md) |
 | 学生性格、语气、关系与阶段 | [证据档案索引](references/characters/INDEX.md)、[按需查原文](references/character-writing.md) |
+| AI 配音、参考音、语音包与试听 | [配音工作流](references/ai-dubbing.md)、`scripts/dub_tool.py --help` |
 | 具体角色的表情 | [人物表情对照表](references/人物表情对照表.md)；自定义角色另查实际骨架 |
 | BGM 曲号/用途 | [BGM 用途](references/BGM用途注释清单.md)、[原始表](references/bgm_table.tsv) |
 | 弹窗画面 | [弹窗注释](references/弹窗图注释清单.md) |
@@ -56,5 +63,7 @@ metadata:
 ## 交付
 
 报告剧情标题、实际源文件、可播放 `.aas`、build 清单、备份路径与关键改动。分别给出静态校验、程序编译/资源检查、发布与播放验收状态。只在完成对应步骤后标记通过；用户能直接浏览已发布成品，无需再进入编辑模式触发编译。
+
+配音任务另交付逐句 WAV、试听轨、plan/report、所用角色状态与语种、跳过或异常列表。区分生成成功、语音已打包、实际播放与人耳验收；不以声纹分数、时长或旧报告中的试听结论替代本次听感验收。模型、环境与原声库不纳入技能包。
 
 版本变更记录见 [CHANGELOG.md](CHANGELOG.md)。

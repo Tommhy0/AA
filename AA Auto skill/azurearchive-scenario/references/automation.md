@@ -78,3 +78,7 @@ python -B -X utf8 scripts/aa_tool.py compile "新工程.aap2" --require-auto --r
 ## 交付状态
 
 分别报告：静态校验（含预览/入口标题与所有选项的 Auto 设置）、原生编译、缺失资源/哈希检查、saves 发布、播放请求，以及人工播放验收。录制交付报告所选自动路线；未实际录制不称为录制成功，`playback_reviewed:false` 不能改写为已看完剧情。
+
+## 带 AI 配音编译
+
+先按[AI 配音流程](ai-dubbing.md)生成并附加语音；对配音工程使用 `compile --require-auto --require-title --require-voices`。`--require-voices` 在启动原生编译后检查 `resource_manifest.omitted_missing_voices`，非空时阻止发布；普通编译对该项给出明确警告。确认本次 WAV 已收录于编译资源目录，区分资源打包和实际试听。

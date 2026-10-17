@@ -439,8 +439,13 @@ def compile_project(args):
     output = job_dir / 'build'
     result = native_request(exe, 'compile', dict(project=str(source), out=str(output), if_version='sha256:' + sha(source)), job_dir, args.timeout)
     if not result.get('ok'): return result
-    checked_build(source, result['data'])
+    _, _, manifest = checked_build(source, result['data'])
+    omitted = manifest.get('resource_manifest', {}).get('omitted_missing_voices', [])
+    if omitted and getattr(args, 'require_voices', False):
+        raise ValueError('Referenced voices were omitted; build was not published: ' + json.dumps(omitted, ensure_ascii=False))
     result['static_warnings'] = warnings
+    if omitted:
+        result['static_warnings'].append(dict(path='$.voice', message='Missing voices were omitted: ' + json.dumps(omitted, ensure_ascii=False)))
     result['verification'] = dict(static=True, compiled=True, hashes=True, missing_resources=False, playback_reviewed=False)
     if data_root is not None:
         result['published'] = publish(source, result['data'], data_root, args.name or source.stem)
@@ -465,6 +470,7 @@ def main():
     p.add_argument('--work-dir', type=Path); p.add_argument('--timeout', type=int, default=90)
     p.add_argument('--require-auto', action='store_true', help='Reject choices without an Auto option before compilation.')
     p.add_argument('--require-title', action='store_true', help='Reject missing scenario titles before compilation.')
+    p.add_argument('--require-voices', action='store_true', help='Reject omitted missing voices before publication.')
     args = parser.parse_args()
     try:
         if args.command == 'discover': result = discover()

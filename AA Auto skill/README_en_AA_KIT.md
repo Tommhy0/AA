@@ -1,6 +1,6 @@
-# AzureArchive Scenario Skill 3.2
+# AzureArchive Scenario Skill 4.0
 
-The original 1.6 skill has been replaced with the complete 3.2 package. The old `_skill` and `_skill2` paths contain updated compatibility copies.
+The original 1.6 skill has been replaced with the complete 4.0 package. The old `_skill` and `_skill2` paths contain updated compatibility copies.
 
 - Copy the complete [azurearchive-scenario](azurearchive-scenario/) folder to `~/.agents/skills/azurearchive-scenario/` for Codex or `~/.claude/skills/azurearchive-scenario/` for Claude Code. Install the scripts, references, assets and examples together.
 - For clients supporting skill archives, download [azurearchive-scenario.skill](azurearchive-scenario.skill).
@@ -14,3 +14,5 @@ Instructions: [SKILL.md](azurearchive-scenario/SKILL.md), [compilation](azurearc
 See [LICENSE](LICENSE). This is a third-party skill; it does not include the application or game assets.
 
 Fill both PreviewTitle and entry.Title before delivery. Preserve existing titles; choose a fitting story title when absent. `--require-title` rejects missing titles before compilation.
+
+Version 4.0 adds local IndexTTS-2.5 AI dubbing in Chinese/Japanese: one character reference, three candidates per line, audio QC, LineId binding and project-local VoiceOverrides. Use `dub_tool.py prepare/render/apply`, then compile with `--require-voices`. Models and original voice libraries stay outside this repository. Human listening review remains necessary. See [AI dubbing](azurearchive-scenario/references/ai-dubbing.md).

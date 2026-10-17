@@ -1,6 +1,6 @@
-# AzureArchive シナリオ制作スキル 3.2
+# AzureArchive シナリオ制作スキル 4.0
 
-旧 1.6 スキルを完全な 3.2 パッケージに更新しました。`_skill` と `_skill2` の旧パスも新版の互換コピーです。
+旧 1.6 スキルを完全な 4.0 パッケージに更新しました。`_skill` と `_skill2` の旧パスも新版の互換コピーです。
 
 - [azurearchive-scenario](azurearchive-scenario/) フォルダー全体を、Codex では `~/.agents/skills/azurearchive-scenario/`、Claude Code では `~/.claude/skills/azurearchive-scenario/` にコピーします。scripts、references、assets、examples も必要です。
 - アーカイブ対応クライアント向け：[azurearchive-scenario.skill](azurearchive-scenario.skill)。
@@ -14,3 +14,5 @@
 [LICENSE](LICENSE) を参照してください。非公式の資料であり、アプリ本体やゲーム素材は含みません。
 
 納品前に PreviewTitle と入口ノードの Title を設定します。既存の題名を保持し、未指定なら物語に合う題名を付けます。`--require-title` は題名の欠落をコンパイル前に検出します。
+
+4.0：ローカル IndexTTS-2.5 による中国語・日本語 AI 吹き替えを追加。単一の参照音声、台詞ごとの3候補と品質検査、LineId 対応、プロジェクト専用 VoiceOverrides を使用します。配音後のコンパイルには `--require-voices` を付けます。モデルと原声音声庫は同梱せず、聴感は人による確認が必要です。[手順](azurearchive-scenario/references/ai-dubbing.md)。

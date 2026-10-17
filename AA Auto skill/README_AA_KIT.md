@@ -1,6 +1,6 @@
-# azurearchive-scenario 3.2
+# azurearchive-scenario 4.0
 
-AzureArchive 剧情创作、人物证据查询、自动编译与录制准备技能。仓库原 1.6 技能已由完整 3.2 版本替换；`_skill` 和 `_skill2` 的旧文件路径保留为新版兼容副本。
+AzureArchive 剧情创作、人物证据查询、自动编译与录制准备技能。仓库原 1.6 技能已由完整 4.0 版本替换；`_skill` 和 `_skill2` 的旧文件路径保留为新版兼容副本。
 
 ## 安装
 
@@ -10,7 +10,7 @@ AzureArchive 剧情创作、人物证据查询、自动编译与录制准备技�
 
 必须连同 scripts、references、assets、examples 一起安装，不能仅复制 SKILL.md。
 
-## 3.2 的主要功能
+## 4.0 的主要功能
 
 - 每个对话选项节点设置一个 Auto，保留既定录制路线，避免自动播放在选项处等待。
 - `validate/compile --require-auto --require-title` 检查每个选项的 DefaultOptionId，遗漏时定位到具体节点；不把 auto 拼到选项文字中。
@@ -31,3 +31,5 @@ python -B -X utf8 scripts/aa_tool.py compile "剧情.aap2" --require-auto --requ
 文本与脚本许可见 [LICENSE](LICENSE)。本仓库为第三方工具与资料，不包含 AA 本体或游戏素材。
 
 3.2 新增剧情标题要求：填写预览 `PreviewTitle` 和入口 `Title`，保留已有标题，缺失时按剧情拟题。交付前使用 `--require-title` 检查，防止空标题进入编译。
+
+4.0 新增[AI 剧情配音](azurearchive-scenario/references/ai-dubbing.md)：本地 IndexTTS-2.5 中日配音、同角色状态参考音、每句三候选取最短有效结果、异常筛查、LineId 绑定和工程专属 VoiceOverrides。调用 `dub_tool.py prepare/render/apply`，带配音编译使用 `--require-voices`。模型与原声库不打包，音色与语气仍需人耳验收。

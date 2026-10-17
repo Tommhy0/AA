@@ -1,6 +1,6 @@
-# AzureArchive 시나리오 스킬 3.2
+# AzureArchive 시나리오 스킬 4.0
 
-기존 1.6 스킬을 완전한 3.2 패키지로 교체했습니다. `_skill`, `_skill2`의 이전 경로도 새 버전의 호환 사본입니다.
+기존 1.6 스킬을 완전한 4.0 패키지로 교체했습니다. `_skill`, `_skill2`의 이전 경로도 새 버전의 호환 사본입니다.
 
 - [azurearchive-scenario](azurearchive-scenario/) 폴더 전체를 Codex의 `~/.agents/skills/azurearchive-scenario/` 또는 Claude Code의 `~/.claude/skills/azurearchive-scenario/`에 복사하세요. scripts, references, assets, examples를 함께 설치해야 합니다.
 - 아카이브를 지원하는 클라이언트: [azurearchive-scenario.skill](azurearchive-scenario.skill).
@@ -14,3 +14,5 @@
 [LICENSE](LICENSE)를 참고하세요. 비공식 자료이며 앱이나 게임 소재를 포함하지 않습니다.
 
 완료 전에 PreviewTitle과 시작 노드의 Title을 입력합니다. 기존 제목을 유지하고 없으면 이야기에 맞는 제목을 정합니다. `--require-title`은 컴파일 전에 누락된 제목을 검사합니다.
+
+4.0: 로컬 IndexTTS-2.5 중국어/일본어 AI 더빙을 추가했습니다. 단일 참조 음성, 대사별 후보 3개와 품질 검사, LineId 연결, 프로젝트 전용 VoiceOverrides를 사용합니다. 더빙 후 컴파일에는 `--require-voices`를 추가하세요. 모델과 원본 음성 라이브러리는 포함하지 않으며 청취 검수가 필요합니다. [사용법](azurearchive-scenario/references/ai-dubbing.md).
